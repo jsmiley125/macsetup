@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-# Automated Mac Setup Script - Updated Nov 2023
+# JJ Smiley
+# Forked from: YANMSS (Yet Another New Mac Setup Script)
+# Original Author: Arun Ravindran
+
+# Automated Mac Setup Script - Updated 9-7-24
 # This script installs essential command-line tools and applications using Homebrew.
 
 echo "Starting Mac setup..."
