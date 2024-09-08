@@ -2,12 +2,25 @@
 
 # JJ Smiley
 # Forked from: YANMSS (Yet Another New Mac Setup Script)
-# Original Author: Arun Ravindran
+# https://github.com/mikeprivette/yanmss
+# Original Author: Mike Privette
 
-# Automated Mac Setup Script - Updated 9-7-24
+# Automated Mac Setup Script - Updated 9-24
 # This script installs essential command-line tools and applications using Homebrew.
 
 echo "Starting Mac setup..."
+
+##################################
+# Install command line dev tools #
+##################################
+# Note: Commenting this out - since it will take a long time to download and install xcode if this is triggered accidentally more than once
+xcode-select -p > /dev/null 2>&1
+if [ $# != 0 ]; then
+  # Uninstall if already present (or) if an older version is installed
+  sudo rm -rf $(xcode-select -p)
+  xcode-select --install
+  sudo xcodebuild -license accept
+fi
 
 # Request and keep the administrator password active.
 sudo -v
@@ -90,14 +103,9 @@ precmd() {
 }
 EOF
 
-# Powerline Fonts Installation: Clone and install Powerline fonts.
+# JetBrains Font Installation: Clone and install Powerline fonts.
 echo "Installing Powerline fonts..."
-if [ ! -d "$HOME/fonts" ]; then
-    git clone https://github.com/powerline/fonts.git "$HOME/fonts"
-    pushd "$HOME/fonts" && ./install.sh && popd
-else
-    echo "Powerline fonts already installed."
-fi
+brew install --cask font-jetbrains-mono
 
 # Python and pip Installation: Install Python and pip (pip is included with Python).
 echo "Checking for Python..."
