@@ -6,14 +6,11 @@
 # Original Author: Mike Privette
 
 # Automated Mac Setup Script - Updated 9-24
-# This script installs essential command-line tools and applications using Homebrew.
+# This script installs essential command-line tools and applications mostly using Homebrew.
 
 echo "Starting Mac setup..."
 
-##################################
-# Install command line dev tools #
-##################################
-# Note: Commenting this out - since it will take a long time to download and install xcode if this is triggered accidentally more than once
+# Install Xcode Command Line Tools if not already installed. 
 xcode-select -p > /dev/null 2>&1
 if [ $# != 0 ]; then
   # Uninstall if already present (or) if an older version is installed
@@ -53,57 +50,36 @@ echo "Updating and Upgrading Homebrew..."
 brew update
 brew upgrade
 
-# XCode Command Line Tools: Install if not already present.
-echo "Checking for Xcode Command Line Tools..."
-if ! xcode-select -p >/dev/null 2>&1; then
-    echo "Installing Xcode Command Line Tools..."
-    xcode-select --install
-else
-    echo "Xcode Command Line Tools already installed."
-fi
-
-# Finder Configuration: Set up Finder preferences like showing hidden files.
-echo "Configuring Finder settings..."
+# Unhide the Library folder.
+echo "Unhiding your Library folder..."
 chflags nohidden ~/Library
-defaults write com.apple.finder AppleShowAllFiles YES
-defaults write com.apple.finder ShowPathbar -bool true
-defaults write com.apple.finder ShowStatusBar -bool true
 
 # Restart Finder to apply changes using AppleScript.
 osascript -e 'tell application "Finder" to quit'
 osascript -e 'tell application "Finder" to launch'
 
-# Terminal and Shell Setup: Install iTerm2 and Oh My Zsh.
-echo "Installing iTerm2..."
-brew install --cask --appdir="/Applications" iterm2
+# Shell Setup: Oh My Zsh.
 echo "Installing oh-my-zsh..."
 RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # Configure .zshrc for Oh My Zsh
 echo "Configuring .zshrc for Oh My Zsh..."
-sed -i '' 's/^ZSH_THEME=".*"$/ZSH_THEME="agnoster"/' ~/.zshrc
-sed -i '' 's/^plugins=(.*)$/plugins=(brew macos)/' ~/.zshrc
-echo 'ZSH_DISABLE_COMPFIX="true"' >> ~/.zshrc
-echo '# Disabling compfix to prevent the "insecure directories" warning when starting zsh' >> ~/.zshrc
-cat << 'EOF' >> ~/.zshrc
+sed -i '' 's/^ZSH_THEME=".*"$/ZSH_THEME="xiong-chiamiov"/' ~/.zshrc
+sed -i '' 's/^plugins=(.*)$/plugins=(brew macos\
+                                    aliases\
+                                    alias-finder\
+                                    colored-man-pages\
+                                    colorize\
+                                    copypath\
+                                    dircycle\
+                                    command-not-found\
+                                    macos\
+                                    nmap)/' ~/.zshrc
+# Here Document: Append custom configuration to .zshrc.
+# cat << 'EOF' >> ~/.zshrc
+# At this time, there is nothing here to add.
 
-# Add my custom functions and settings here.
-preexec() {
-  timer=$(gdate +%s.%N)
-}
-
-precmd() {
-  if [ -n "$timer" ]; then
-    now=$(gdate +%s.%N)
-    elapsed=$(echo "$now - $timer" | bc)
-    timer_show=$(printf "%.2f" $elapsed)
-    echo "Execution time: ${timer_show}s"
-    unset timer
-  fi
-}
-EOF
-
-# JetBrains Font Installation: Clone and install Powerline fonts.
+# JetBrains Font Installation.
 echo "Installing Powerline fonts..."
 brew install --cask font-jetbrains-mono
 
@@ -118,13 +94,17 @@ fi
 
 # Core Applications Installation: Install essential applications using Homebrew.
 echo "Installing core applications..."
-brew install --cask --appdir="/Applications" alfred
-brew install --cask --appdir="/Applications" visual-studio-code
-brew install --cask --appdir="/Applications" slack
-brew install --cask --appdir="/Applications" 1password
+brew install --casks visual-studio-code 1password powershell google-chrome firefox\
+                     speedtest adobe-acrobat-pro adobe-creative-cloud\
+                     typeface microsoft-office microsoft-teams microsoft-remote-desktop\
+                     onedrive soulver parallels microsoft-edge termius backblaze
+
+brew install wget genact nmap speedtest-cli
 
 # Clean up: Remove outdated versions from the cellar.
 echo "Running brew cleanup..."
 brew cleanup
+brew autoremove
 
+# We're done!
 echo "Mac setup script completed."
