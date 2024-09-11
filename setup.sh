@@ -108,6 +108,9 @@ defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
 #"Making Safari's search banners default to Contains instead of Starts With"
 defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
+# Prevent macOS from reopening Windows when logging back in
+defaults write com.apple.loginwindow TALLogoutSavesState -bool false
+
 killall Finder
 
 # Homebrew Installation: Install Homebrew if not already installed.
