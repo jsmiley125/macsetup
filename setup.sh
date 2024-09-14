@@ -9,6 +9,7 @@
 # This script installs essential command-line tools and applications mostly using Homebrew.
 
 echo "Starting Mac setup..."
+echo
 
 # Install Xcode Command Line Tools if not already installed. 
 xcode-select -p > /dev/null 2>&1
@@ -21,14 +22,6 @@ fi
 # Request and keep the administrator password active.
 sudo -v
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-
-# Check the system processor: M1/M2/M3 (ARM) or Intel.
-ARCH=$(uname -m)
-if [[ "$ARCH" == "arm64" ]]; then
-    echo "M1/M2/M3 Processor detected. Proceeding with compatible installations."
-else
-    echo "Intel Processor detected. Proceeding with installations."
-fi
 
 # Trackpad: enable tap to click for this user and for the login screen
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
@@ -90,21 +83,21 @@ defaults write com.apple.ActivityMonitor ShowCategory -int 0
 defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0
 
-#"Disabling the warning when changing a file extension"
+# Disable the warning when changing a file extension
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
-#"Enabling snap-to-grid for icons on the desktop and in other icon views"
+# Enabling snap-to-grid for icons on the desktop and in other icon views
 /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 
-#"Setting the icon size of Dock items to 36 pixels for optimal size/screen-realestate"
+# Set the icon size of Dock items to 36 pixels for optimal size/screen-realestate
 defaults write com.apple.dock tilesize -int 36
 
-#"Setting email addresses to copy as 'foo@example.com' instead of 'Foo Bar <foo@example.com>' in Mail.app"
+# Set email addresses to copy as 'foo@example.com' instead of 'Foo Bar <foo@example.com>' in Mail.app
 defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
 
-#"Making Safari's search banners default to Contains instead of Starts With"
+# Make Safari's search banners default to Contains instead of Starts With
 defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
 # Prevent macOS from reopening Windows when logging back in
@@ -188,4 +181,5 @@ echo "Running brew cleanup..."
 brew cleanup && brew autoremove
 
 # We're done!
+echo
 echo "Mac setup script completed."
