@@ -157,10 +157,7 @@ fi
 
 # Update and upgrade Homebrew
 echo "Updating and upgrading Homebrew..."
-if ! brew update && brew upgrade; then
-    echo "Homebrew update/upgrade failed. Exiting."
-    exit 1
-fi
+brew update && brew upgrade
 
 # Shell Setup: Oh My Zsh
 echo "Installing Oh My Zsh..."
@@ -191,7 +188,6 @@ source /${HOME}/.zshrc
 
 # Install JetBrains Mono Font
 echo "Installing JetBrains Mono font..."
-brew tap homebrew/cask-fonts
 brew install --cask font-jetbrains-mono
 
 # Python and pip Installation
@@ -204,7 +200,13 @@ else
 fi
 
 # Install applications from Brewfile
-BREWFILE="${HOME}/Documents/NewMacSetup/Brewfile"
+# While in testing phase, the path below will not work. Until testing is
+# complete, the Brewfile will be located in the same directory as this script.
+BREWFILE=./Brewfile                      # Temporary path for testing.
+# When testing is complete and this script works as expected, uncomment the
+# line below and comment out the line above.
+# BREWFILE="${HOME}/Documents/NewMacSetup/Brewfile"
+
 if [[ -f "$BREWFILE" ]]; then
     echo "Installing packages from Brewfile..."
     brew bundle --file "$BREWFILE"
