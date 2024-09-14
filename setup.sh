@@ -12,11 +12,10 @@ echo "Starting Mac setup..."
 
 # Install Xcode Command Line Tools if not already installed. 
 xcode-select -p > /dev/null 2>&1
-if [ $# != 0 ]; then
-  # Uninstall if already present (or) if an older version is installed
-  sudo rm -rf $(xcode-select -p)
-  xcode-select --install
-  sudo xcodebuild -license accept
+if ! xcode-select -p > /dev/null 2>&1; then
+    # Command Line Tools not installed
+    xcode-select --install
+    sudo xcodebuild -license accept
 fi
 
 # Request and keep the administrator password active.
@@ -40,7 +39,7 @@ defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 sudo nvram SystemAudioVolume=" "
 
 # Close any open System Preferences panes, to prevent them from overriding settings we’re about to change
-osascript -e 'tell application "System Preferences" to quit'
+osascript -e 'tell application "System Preferences" to quit' || echo "Failed to close System Preferences"
 
 # Expand save panel by default
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
@@ -162,7 +161,7 @@ sed -i '' 's/^plugins=(.*)$/plugins=(brew macos\
 # At this time, there is nothing here to add.
 
 # JetBrains Font Installation.
-echo "Installing Powerline fonts..."
+echo "Installing JetBrains font..."
 brew install --cask font-jetbrains-mono
 
 # Python and pip Installation: Install Python and pip (pip is included with Python).
@@ -174,32 +173,19 @@ else
     echo "Python already installed."
 fi
 
-####
-# The block below was originally written with the expection that we
-# would be using 'brew install' to install all software.
-# However, we can probaly use a "brew budle" command to get this completed
-# and potentially provide a better more inclusive install experience.
-# For now, we are commenting out the block below and then using the next
-# block to install a brew bundle.
-####
-
-# # Core Applications Installation: Install essential applications using Homebrew.
-# echo "Installing core applications..."
-# brew install --casks visual-studio-code 1password powershell google-chrome firefox\
-#                      speedtest adobe-acrobat-pro adobe-creative-cloud\
-#                      typeface microsoft-office microsoft-teams microsoft-remote-desktop\
-#                      onedrive soulver parallels microsoft-edge termius backblaze\
-#                      spotify
-
-# brew install mas wget genact nmap speedtest-cli
-
 # Using "brew bundle" to install our applications:
+
+if [[ -f "/Users/$USER/Documents/NewMacSetup/Brewfile" ]]; then
+    brew bundle --file /Users/$USER/Documents/NewMacSetup/Brewfile
+else
+    echo "Brewfile not found!"
+fi
+
 brew bundle --file /Users/$USER/Documents/NewMacSetup/Brewfile
 
 # Clean up: Remove outdated versions from the cellar.
 echo "Running brew cleanup..."
-brew cleanup
-brew autoremove
+brew cleanup && brew autoremove
 
 # We're done!
 echo "Mac setup script completed."
