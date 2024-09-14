@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# v.0.1919
+# v.0.1928
 
 # JJ Smiley
 # Forked from: YANMSS (Yet Another New Mac Setup Script)
@@ -181,11 +181,11 @@ plugins=(\
     command-not-found\
     nmap\
 )
-' ~/.zshrc
+' ${HOME}/.zshrc
 
 # Oh My Zsh configuration updated. Sourcing .zshrc.
 echo "Oh My Zsh configuration updated. Sourced new .zshrc."
-source /${HOME}/.zshrc
+source ${HOME}/.zshrc
 
 # Install JetBrains Mono Font
 echo "Installing JetBrains Mono font..."
@@ -222,3 +222,14 @@ brew cleanup && brew autoremove
 echo
 echo "Mac setup script completed."
 echo "Some changes may require a logout/restart to take full effect."
+
+# TODO:
+# Fix the .zshrc configuration process. It seems like the process to add
+# the text to the .zshrc file for the plugins is not working as expected.
+#
+# During the configure .zshrc process, Brew thinks it's being called
+# for some unknown reason.
+#
+# Fix error stating the Command Line Tools are too outdated.
+#
+# 
