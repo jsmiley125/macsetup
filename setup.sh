@@ -22,13 +22,15 @@ if ! xcode-select -p > /dev/null 2>&1; then
         sleep 5
     done
     echo "Xcode Command Line Tools installed."
-
-    sudo xcodebuild -license accept
 fi
 
 # Request and keep the administrator password active.
 sudo -v
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+while true; do
+    sudo -n true
+    sleep 60
+    kill -0 "$$" || exit
+done 2>/dev/null &
 
 # Initiate iCloud Folder Downloads
 echo "Initiating iCloud folder downloads..."
@@ -46,12 +48,8 @@ if ! command -v brctl >/dev/null 2>&1; then
     echo "brctl command not found. Skipping iCloud folder downloads."
 else
     for folder in "${ICLOUD_FOLDERS[@]}"; do
-        if [ -d "$folder" ]; then
-            echo "Starting download of $folder..."
-            brctl download "$folder" &
-        else
-            echo "Folder $folder does not exist."
-        fi
+        echo "Starting download of $folder..."
+        brctl download "$folder" &
     done
     echo "iCloud folder downloads initiated in the background."
 fi
@@ -159,7 +157,10 @@ fi
 
 # Update and upgrade Homebrew
 echo "Updating and upgrading Homebrew..."
-brew update && brew upgrade
+if ! brew update && brew upgrade; then
+    echo "Homebrew update/upgrade failed. Exiting."
+    exit 1
+fi
 
 # Shell Setup: Oh My Zsh
 echo "Installing Oh My Zsh..."
@@ -184,8 +185,13 @@ plugins=(\
 )
 ' ~/.zshrc
 
+# Oh My Zsh configuration updated. Sourcing .zshrc.
+echo "Oh My Zsh configuration updated. Sourced new .zshrc."
+source /${HOME}/.zshrc
+
 # Install JetBrains Mono Font
 echo "Installing JetBrains Mono font..."
+brew tap homebrew/cask-fonts
 brew install --cask font-jetbrains-mono
 
 # Python and pip Installation
@@ -212,3 +218,4 @@ brew cleanup && brew autoremove
 
 echo
 echo "Mac setup script completed."
+echo "Some changes may require a logout/restart to take full effect."
