@@ -11,12 +11,17 @@
 echo "Starting Mac setup..."
 echo
 
-# Install Xcode Command Line Tools if not already installed. 
-xcode-select -p > /dev/null 2>&1
+# Install Xcode Command Line Tools if not already installed.
 if ! xcode-select -p > /dev/null 2>&1; then
-    # Command Line Tools not installed
+    echo "Installing Xcode Command Line Tools..."
     xcode-select --install
-    sudo xcodebuild -license accept
+
+    # Wait until the Command Line Tools are installed
+    echo "Waiting for Xcode Command Line Tools installation to complete..."
+    until xcode-select -p > /dev/null 2>&1; do
+        sleep 5
+    done
+    echo "Xcode Command Line Tools installed."
 fi
 
 # Request and keep the administrator password active.
@@ -31,7 +36,7 @@ defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
 
-# Close any open System Preferences panes, to prevent them from overriding settings we’re about to change
+# Close any open System Preferences panes to prevent them from overriding settings we're about to change
 osascript -e 'tell application "System Preferences" to quit' || echo "Failed to close System Preferences"
 
 # Expand save panel by default
@@ -45,12 +50,12 @@ defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
 # Disable the “Are you sure you want to open this application?” dialog
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-# Reveal IP address, hostname, OS version, etc. when clicking the clock in the login window
+# Reveal IP address, hostname, OS version, etc., when clicking the clock in the login window
 sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo HostName
 
 # Set Applications as the default location for new Finder windows
 defaults write com.apple.finder NewWindowTarget -string "PfDe"
-defaults write com.apple.finder NewWindowTargetPath -string "file://Applications/"
+defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Applications/"
 
 # Finder: Keep folders on top when sorting by name
 defaults write com.apple.finder _FXSortFoldersFirst -bool true
@@ -60,15 +65,14 @@ defaults write com.apple.frameworks.diskimages auto-open-ro-root -bool true
 defaults write com.apple.frameworks.diskimages auto-open-rw-root -bool true
 defaults write com.apple.finder OpenWindowForNewRemovableDisk -bool true
 
-# Use column view in all Finder windows by default (codes for the other view modes: `icnv`, `clmv`, `Flwv`)
-defaults write com.apple.finder FXPreferredViewStyle -string "Clmv"
+# Use column view in all Finder windows by default
+defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
-# Expand the following File Info panes:
-# “General”, “Open with”, and “Sharing & Permissions”
+# Expand the following File Info panes: “General”, “Open with”, and “Sharing & Permissions”
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
-	General -bool true \
-	OpenWith -bool true \
-	Privileges -bool true
+    General -bool true \
+    OpenWith -bool true \
+    Privileges -bool true
 
 # Prevent Time Machine from prompting to use new hard drives as backup volume
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
@@ -86,12 +90,12 @@ defaults write com.apple.ActivityMonitor SortDirection -int 0
 # Disable the warning when changing a file extension
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
-# Enabling snap-to-grid for icons on the desktop and in other icon views
+# Enable snap-to-grid for icons on the desktop and in other icon views
 /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 
-# Set the icon size of Dock items to 36 pixels for optimal size/screen-realestate
+# Set the icon size of Dock items to 36 pixels for optimal size/screen real estate
 defaults write com.apple.dock tilesize -int 36
 
 # Set email addresses to copy as 'foo@example.com' instead of 'Foo Bar <foo@example.com>' in Mail.app
@@ -100,9 +104,14 @@ defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
 # Make Safari's search banners default to Contains instead of Starts With
 defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
-# Prevent macOS from reopening Windows when logging back in
+# Prevent macOS from reopening windows when logging back in
 defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 
+# Unhide the Library folder
+echo "Unhiding your Library folder..."
+chflags nohidden ~/Library
+
+# Restart Finder to apply changes
 killall Finder
 
 # Homebrew Installation: Install Homebrew if not already installed.
@@ -119,45 +128,39 @@ else
     echo "Homebrew already installed."
 fi
 
-# Update and Upgrade Homebrew: Ensure Homebrew is up-to-date.
-echo "Updating and Upgrading Homebrew..."
+# Update and upgrade Homebrew
+echo "Updating and upgrading Homebrew..."
 brew update
 brew upgrade
 
-# Unhide the Library folder.
-echo "Unhiding your Library folder..."
-chflags nohidden ~/Library
-
-# Restart Finder to apply changes using AppleScript.
-osascript -e 'tell application "Finder" to quit'
-osascript -e 'tell application "Finder" to launch'
-
-# Shell Setup: Oh My Zsh.
-echo "Installing oh-my-zsh..."
-RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+# Shell Setup: Oh My Zsh
+echo "Installing Oh My Zsh..."
+export RUNZSH=no
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # Configure .zshrc for Oh My Zsh
 echo "Configuring .zshrc for Oh My Zsh..."
-sed -i '' 's/^ZSH_THEME=".*"$/ZSH_THEME="xiong-chiamiov"/' ~/.zshrc
-sed -i '' 's/^plugins=(.*)$/plugins=(brew macos\
-                                    aliases\
-                                    alias-finder\
-                                    colored-man-pages\
-                                    colorize\
-                                    copypath\
-                                    dircycle\
-                                    command-not-found\
-                                    macos\
-                                    nmap)/' ~/.zshrc
-# Here Document: Append custom configuration to .zshrc.
-# cat << 'EOF' >> ~/.zshrc
-# At this time, there is nothing here to add.
+sed -i '' 's/^ZSH_THEME="[^"]*"/ZSH_THEME="xiong-chiamiov"/' ~/.zshrc
+sed -i '' '/^plugins=/c\
+plugins=(\
+    brew\
+    macos\
+    aliases\
+    alias-finder\
+    colored-man-pages\
+    colorize\
+    copypath\
+    dircycle\
+    command-not-found\
+    nmap\
+)
+' ~/.zshrc
 
-# JetBrains Font Installation.
-echo "Installing JetBrains font..."
+# Install JetBrains Mono Font
+echo "Installing JetBrains Mono font..."
 brew install --cask font-jetbrains-mono
 
-# Python and pip Installation: Install Python and pip (pip is included with Python).
+# Python and pip Installation
 echo "Checking for Python..."
 if ! command -v python3 >/dev/null 2>&1; then
     echo "Installing Python..."
@@ -166,20 +169,18 @@ else
     echo "Python already installed."
 fi
 
-# Using "brew bundle" to install our applications:
-
-if [[ -f "/Users/$USER/Documents/NewMacSetup/Brewfile" ]]; then
-    brew bundle --file /Users/$USER/Documents/NewMacSetup/Brewfile
+# Install applications from Brewfile
+BREWFILE="${HOME}/Documents/NewMacSetup/Brewfile"
+if [[ -f "$BREWFILE" ]]; then
+    echo "Installing packages from Brewfile..."
+    brew bundle --file "$BREWFILE"
 else
-    echo "Brewfile not found!"
+    echo "Brewfile not found at $BREWFILE!"
 fi
 
-brew bundle --file /Users/$USER/Documents/NewMacSetup/Brewfile
-
-# Clean up: Remove outdated versions from the cellar.
+# Clean up: Remove outdated versions
 echo "Running brew cleanup..."
 brew cleanup && brew autoremove
 
-# We're done!
 echo
 echo "Mac setup script completed."
