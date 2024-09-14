@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# v.0.1919
 
 # JJ Smiley
 # Forked from: YANMSS (Yet Another New Mac Setup Script)
