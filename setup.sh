@@ -22,6 +22,8 @@ if ! xcode-select -p > /dev/null 2>&1; then
         sleep 5
     done
     echo "Xcode Command Line Tools installed."
+
+    sudo xcodebuild -license accept
 fi
 
 # Request and keep the administrator password active.
@@ -130,8 +132,7 @@ fi
 
 # Update and upgrade Homebrew
 echo "Updating and upgrading Homebrew..."
-brew update
-brew upgrade
+brew update && brew upgrade
 
 # Shell Setup: Oh My Zsh
 echo "Installing Oh My Zsh..."
