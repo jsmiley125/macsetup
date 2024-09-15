@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# v.0.15.1155
+# v.0.15.1223
 
 # JJ Smiley
 # Forked from: YANMSS (Yet Another New Mac Setup Script)
@@ -26,15 +26,6 @@ dock_item() {
             </dict>
         </dict>
     </dict>' "$app_path"
-}
-
-# Function to run a command with specific redirection
-# Usage example:
-# suppress_output "/bin/zsh -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-suppress_output() {
-    local cmd="$1"
-    echo "Running: $cmd"
-    eval "$cmd" 1>>"$LOGFILE" 2> >(tee -a "$LOGFILE" >&2)
 }
 
 echo "Starting Mac setup..."
@@ -178,9 +169,9 @@ if ! command -v brew >/dev/null 2>&1; then
 LOGFILE="/tmp/homebrew_install.log"
 
 # Run the Homebrew installation with redirected output
-suppress_output "/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
     1>"$LOGFILE" \
-    2> >(tee -a "$LOGFILE" >&2)"
+    2> >(tee -a "$LOGFILE" >&2)
 
 # Check if Homebrew was installed successfully
 if command -v brew >/dev/null 2>&1; then
