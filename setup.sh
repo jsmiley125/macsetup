@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# v.0.1928
+# v.0.15.0924
 
 # JJ Smiley
 # Forked from: YANMSS (Yet Another New Mac Setup Script)
@@ -22,7 +22,6 @@ if ! xcode-select -p > /dev/null 2>&1; then
     until xcode-select -p > /dev/null 2>&1; do
         sleep 5
     done
-    sudo xcodebuild -license accept
     echo "Xcode Command Line Tools installed."
 fi
 
@@ -122,9 +121,9 @@ defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0
 
 # Enable snap-to-grid for icons on the desktop and in other icon views
-/usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
-/usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
-/usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
+/usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy grid" ${HOME}/Library/Preferences/com.apple.finder.plist
+/usr/libexec/PlistBuddy -c "Add :FK_StandardViewSettings:IconViewSettings:showItemInfo bool true" "${HOME}/Library/Preferences/com.apple.finder.plist"
+/usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy grid" ${HOME}/Library/Preferences/com.apple.finder.plist
 
 # Set the icon size of Dock items to 36 pixels for optimal size/screen real estate
 defaults write com.apple.dock tilesize -int 36
@@ -133,11 +132,11 @@ defaults write com.apple.dock tilesize -int 36
 defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
 
 # Make Safari's search banners default to Contains instead of Starts With
-defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
+ sudo defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
 # Unhide the Library folder
 echo "Unhiding your Library folder..."
-chflags nohidden ~/Library
+chflags nohidden ${HOME}/Library
 
 # Restart Finder to apply changes
 killall Finder
@@ -150,7 +149,7 @@ if ! command -v brew >/dev/null 2>&1; then
 
     # Add Homebrew to PATH
     echo "Adding Homebrew to PATH..."
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ${HOME}/.zprofile
     eval "$(/opt/homebrew/bin/brew shellenv)"
 else
     echo
@@ -167,7 +166,7 @@ export RUNZSH=no
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # Backup .zshrc before we make any changes to it
-cp ~/.zshrc ~/.zshrc.backup
+cp ${HOME}/.zshrc ${HOME}/.zshrc.backup
 
 # Configure .zshrc for Oh My Zsh
 echo "Configuring .zshrc for Oh My Zsh..."
@@ -239,22 +238,22 @@ dock_item() {
 
 # List of applications to add to the Dock
 apps=(
-    "/Applications/Messages.app"
-    "/Applications/Mail.app"
-    "/Applications/Safari.app"
-    "/Applications/Photos.app"
-    "/Applications/Calendar.app"
+    "/System/Applications/Messages.app"
+    "/System/Applications/Mail.app"
+    "/System/Applications/Safari.app"
+    "/System/Applications/Photos.app"
+    "/System/Applications/Calendar.app"
     "/Applications/Microsoft Outlook.app"
     "/Applications/Microsoft Teams.app"
     "/Applications/Visual Studio Code.app"
     "/Applications/Termius.app"
-    "/Applications/Reminders.app"
-    "/Applications/Notes.app"
+    "/System/Applications/Reminders.app"
+    "/System/Applications/Notes.app"
     "/Applications/Adobe Illustrator 2024/Adobe Illustrator 2024.app"
     "/Applications/Adobe InDesign 2024/Adobe InDesign 2024.app"
-    "/Applications/Music.app"
-    "/Applications/Podcasts.app"
-    "/Applications/Apple News.app"
+    "/System/Applications/Music.app"
+    "/System/Applications/Podcasts.app"
+    "/System/Applications/News.app"
 )
 
 # Clear existing persistent apps in the Dock
@@ -278,14 +277,3 @@ killall Dock
 echo
 echo "Mac setup script completed."
 echo "Some changes may require a logout/restart to take full effect."
-
-# TODO:
-# Fix the .zshrc configuration process. It seems like the process to add
-# the text to the .zshrc file for the plugins is not working as expected.
-#
-# During the configure .zshrc process, Brew thinks it's being called
-# for some unknown reason.
-#
-# Fix error stating the Command Line Tools are too outdated.
-#
-# 
