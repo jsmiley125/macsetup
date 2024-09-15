@@ -22,6 +22,7 @@ if ! xcode-select -p > /dev/null 2>&1; then
     until xcode-select -p > /dev/null 2>&1; do
         sleep 5
     done
+    sudo xcodebuild -license accept
     echo "Xcode Command Line Tools installed."
 fi
 
@@ -165,27 +166,21 @@ echo "Installing Oh My Zsh..."
 export RUNZSH=no
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
+# Backup .zshrc before we make any changes to it
+cp ~/.zshrc ~/.zshrc.backup
+
 # Configure .zshrc for Oh My Zsh
 echo "Configuring .zshrc for Oh My Zsh..."
-sed -i '' 's/^ZSH_THEME="[^"]*"/ZSH_THEME="xiong-chiamiov"/' ~/.zshrc
-sed -i '' '/^plugins=/c\
-plugins=(\
-    brew\
-    macos\
-    aliases\
-    alias-finder\
-    colored-man-pages\
-    colorize\
-    copypath\
-    dircycle\
-    command-not-found\
-    nmap\
-)
-' ${HOME}/.zshrc
 
-# Oh My Zsh configuration updated. Sourcing .zshrc.
-echo "Oh My Zsh configuration updated. Sourced new .zshrc."
-source ${HOME}/.zshrc
+# Update the ZSH_THEME line
+sed -i '' 's/^ZSH_THEME="[^"]*"/ZSH_THEME="xiong-chiamiov"/' "${HOME}/.zshrc"
+
+# Update the plugins line
+sed -i '' 's/^plugins=.*/plugins=(brew macos aliases alias-finder colored-man-pages colorize copypath dircycle command-not-found nmap)/' "${HOME}/.zshrc"
+
+# Source the updated .zshrc file
+echo "Reloading .zshrc to apply changes..."
+source "${HOME}/.zshrc"
 
 # Install JetBrains Mono Font
 echo "Installing JetBrains Mono font..."
@@ -215,9 +210,70 @@ else
     echo "Brewfile not found at $BREWFILE!"
 fi
 
-# Clean up: Remove outdated versions
-echo "Running brew cleanup..."
-brew cleanup && brew autoremove
+# Update and upgrade Homebrew
+echo "Updating and upgrading Homebrew..."
+
+if ! (brew update >/dev/null 2>&1 && brew upgrade >/dev/null 2>&1); then
+    echo "Homebrew update/upgrade failed. Exiting."
+    exit 1
+fi
+
+# Now, let's customize the Dock. We'll remove all existing items and add the ones we want.
+
+# Function to create a Dock item for the specified application
+dock_item() {
+    local app_path="$1"
+    printf '<dict>
+        <key>tile-data</key>
+        <dict>
+            <key>file-data</key>
+            <dict>
+                <key>_CFURLString</key>
+                <string>%s</string>
+                <key>_CFURLStringType</key>
+                <integer>0</integer>
+            </dict>
+        </dict>
+    </dict>' "$app_path"
+}
+
+# List of applications to add to the Dock
+apps=(
+    "/Applications/Messages.app"
+    "/Applications/Mail.app"
+    "/Applications/Safari.app"
+    "/Applications/Photos.app"
+    "/Applications/Calendar.app"
+    "/Applications/Microsoft Outlook.app"
+    "/Applications/Microsoft Teams.app"
+    "/Applications/Visual Studio Code.app"
+    "/Applications/Termius.app"
+    "/Applications/Reminders.app"
+    "/Applications/Notes.app"
+    "/Applications/Adobe Illustrator 2024/Adobe Illustrator 2024.app"
+    "/Applications/Adobe InDesign 2024/Adobe InDesign 2024.app"
+    "/Applications/Music.app"
+    "/Applications/Podcasts.app"
+    "/Applications/Apple News.app"
+)
+
+# Clear existing persistent apps in the Dock
+echo "Clearing existing persistent apps in the Dock..."
+defaults write com.apple.dock persistent-apps -array
+
+# Add each application to the Dock if it exists
+echo "Adding applications to the Dock..."
+for app in "${apps[@]}"; do
+    if [ -e "$app" ]; then
+        defaults write com.apple.dock persistent-apps -array-add "$(dock_item "$app")"
+    else
+        echo "Application not found: $app"
+    fi
+done
+
+# Restart the Dock to apply changes
+echo "Restarting the Dock..."
+killall Dock
 
 echo
 echo "Mac setup script completed."
