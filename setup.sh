@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# v.0.15.0924
+# v.0.15.1155
 
 # JJ Smiley
 # Forked from: YANMSS (Yet Another New Mac Setup Script)
@@ -8,6 +8,34 @@
 
 # Automated Mac Setup Script - Updated 9-24
 # This script installs essential command-line tools and applications mostly using Homebrew.
+
+# Functions for the script go here:
+
+# Function to create a Dock item for the specified application
+dock_item() {
+    local app_path="$1"
+    printf '<dict>
+        <key>tile-data</key>
+        <dict>
+            <key>file-data</key>
+            <dict>
+                <key>_CFURLString</key>
+                <string>%s</string>
+                <key>_CFURLStringType</key>
+                <integer>0</integer>
+            </dict>
+        </dict>
+    </dict>' "$app_path"
+}
+
+# Function to run a command with specific redirection
+# Usage example:
+# suppress_output "/bin/zsh -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+suppress_output() {
+    local cmd="$1"
+    echo "Running: $cmd"
+    eval "$cmd" 1>>"$LOGFILE" 2> >(tee -a "$LOGFILE" >&2)
+}
 
 echo "Starting Mac setup..."
 echo
@@ -145,12 +173,22 @@ killall Finder
 echo "Checking for Homebrew..."
 if ! command -v brew >/dev/null 2>&1; then
     echo "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-    # Add Homebrew to PATH
-    echo "Adding Homebrew to PATH..."
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ${HOME}/.zprofile
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+# Define the log file path
+LOGFILE="/tmp/homebrew_install.log"
+
+# Run the Homebrew installation with redirected output
+suppress_output "/bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+    1>"$LOGFILE" \
+    2> >(tee -a "$LOGFILE" >&2)"
+
+# Check if Homebrew was installed successfully
+if command -v brew >/dev/null 2>&1; then
+    echo "Homebrew installed successfully."
+else
+    echo "Homebrew installation failed. Please check the log file at $LOGFILE for details."
+    exit 1
+fi
 else
     echo
     echo "Homebrew already installed."
@@ -218,29 +256,11 @@ if ! (brew update >/dev/null 2>&1 && brew upgrade >/dev/null 2>&1); then
 fi
 
 # Now, let's customize the Dock. We'll remove all existing items and add the ones we want.
-
-# Function to create a Dock item for the specified application
-dock_item() {
-    local app_path="$1"
-    printf '<dict>
-        <key>tile-data</key>
-        <dict>
-            <key>file-data</key>
-            <dict>
-                <key>_CFURLString</key>
-                <string>%s</string>
-                <key>_CFURLStringType</key>
-                <integer>0</integer>
-            </dict>
-        </dict>
-    </dict>' "$app_path"
-}
-
 # List of applications to add to the Dock
 apps=(
     "/System/Applications/Messages.app"
     "/System/Applications/Mail.app"
-    "/System/Applications/Safari.app"
+    "/Applications/Safari.app"
     "/System/Applications/Photos.app"
     "/System/Applications/Calendar.app"
     "/Applications/Microsoft Outlook.app"
