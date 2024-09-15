@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 # v.0.15.0924
 
 # JJ Smiley
