@@ -52,6 +52,25 @@ while true; do
     kill -0 "$$" || exit
 done 2>/dev/null &
 
+# First, let's give this shiny new Mac (or rebuilt Mac) a name.
+# Set Computer Name
+echo "Configuring computer name..."
+
+# Prompt the user for the new computer name
+read -p "Enter the new computer name: " NEW_COMPUTER_NAME
+
+if [ -z "$NEW_COMPUTER_NAME" ]; then
+    echo "No computer name provided. Skipping computer name configuration."
+else
+    # Set the new computer name
+    sudo scutil --set ComputerName "$NEW_COMPUTER_NAME"
+    sudo scutil --set HostName "$NEW_COMPUTER_NAME"
+    sudo scutil --set LocalHostName "$NEW_COMPUTER_NAME"
+    sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$NEW_COMPUTER_NAME"
+
+    echo "Computer name set to '$NEW_COMPUTER_NAME'."
+fi
+
 # Initiate iCloud Folder Downloads
 echo "Initiating iCloud folder downloads..."
 
@@ -76,6 +95,10 @@ fi
 
 # Close any open System Preferences panes to prevent them from overriding settings we're about to change
 osascript -e 'tell application "System Preferences" to quit' || echo "Failed to close System Preferences"
+
+# Decrease key repeat time and increase key repeat rate
+defaults write -g InitialKeyRepeat -int 6 # normal minimum is 15 (225 ms)
+defaults write -g KeyRepeat -int 1 # normal minimum is 2 (30 ms)
 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
