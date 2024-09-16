@@ -85,7 +85,7 @@ fi
 echo "Configuring computer name..."
 
 # Prompt the user for the new computer name
-read -p "Enter the new computer name: " NEW_COMPUTER_NAME
+read "NEW_COMPUTER_NAME?Enter the new computer name: "
 
 if [ -z "$NEW_COMPUTER_NAME" ]; then
     echo "No computer name provided. Skipping computer name configuration."
@@ -111,6 +111,9 @@ defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 defaults write -g InitialKeyRepeat -int 12 # normal minimum is 15 (225 ms)
 defaults write -g KeyRepeat -int 2 # normal minimum is 2 (30 ms)
 
+# Show hard disks on the desktop.
+defaults write com.apple.finder "ShowHardDrivesOnDesktop" -bool "true"
+
 # Hide "Recent Tags" from Finder Sidebar.
 defaults write com.apple.Finder ShowRecentTags -bool false
 
@@ -134,7 +137,7 @@ defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # Set Applications as the default location for new Finder windows
 defaults write com.apple.finder NewWindowTarget -string "PfDe"
-defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Applications/"
+defaults write com.apple.finder NewWindowTargetPath -string "file:///Applications/"
 
 # Trackpad: enable tap to click for this user and for the login screen
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
@@ -249,7 +252,7 @@ fi
 
 # Install applications from Brewfile
 # Prompt the user for the path to the Brewfile
-read -p "Enter the path to the Brewfile: " BREWFILE
+read "BREWFILE?Enter the path to the Brewfile: "
 
 # Check if the Brewfile exists and install the applications
 if [[ -f "$BREWFILE" ]]; then
