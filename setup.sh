@@ -198,12 +198,16 @@ killall Finder
 echo "Checking for Homebrew..."
 if ! command -v brew >/dev/null 2>&1; then
     echo "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Define the log file path
-LOGFILE="/tmp/homebrew_install.log"
-
-# Install Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Add Homebrew to PATH
+    echo "Adding Homebrew to PATH..."
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ${HOME}/.zprofile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+else
+    echo
+    echo "Homebrew already installed."
+fi
 
 # Update and upgrade Homebrew
 echo "Updating and upgrading Homebrew..."
