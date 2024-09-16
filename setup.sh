@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# v.0.16.1809
+# v.0.16.1825
 
 # JJ Smiley
 # Forked from: YANMSS (Yet Another New Mac Setup Script)
