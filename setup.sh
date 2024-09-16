@@ -104,8 +104,14 @@ osascript -e 'tell application "System Preferences" to quit' || echo "Failed to 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
 
+# Set clock to 24 hour time
+defaults write com.apple.menuextra.clock DateFormat HH:mm:ss
+
 # Disable Click Wallpaper to Reveal Desktop
 defaults write com.apple.WindowManager EnableStandardClickToShowDesktop -bool false
+
+# Disable notification when new song plays in Music app
+defaults write com.apple.Music userWantsNowPlayingNotifications -bool false
 
 # Prevent macOS from reopening windows when logging back in
 defaults write com.apple.loginwindow TALLogoutSavesState -bool false
@@ -139,7 +145,7 @@ defaults write com.apple.finder _FXSortFoldersFirst -bool true
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # Set Applications as the default location for new Finder windows
-defaults write com.apple.finder NewWindowTarget -string "PfDe"
+defaults write com.apple.finder NewWindowTarget -string "PfLo"
 defaults write com.apple.finder NewWindowTargetPath -string "file:///Applications/"
 
 # Trackpad: enable tap to click for this user and for the login screen
