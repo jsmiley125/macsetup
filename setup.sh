@@ -103,6 +103,9 @@ defaults write -g KeyRepeat -int 2 # normal minimum is 2 (30 ms)
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
 
+# Remove items from the trash after 30 days.
+defaults write com.apple.finder "FXRemoveOldTrashItems" -bool "true"
+
 # Prevent macOS from reopening windows when logging back in
 defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 
