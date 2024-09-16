@@ -104,6 +104,9 @@ osascript -e 'tell application "System Preferences" to quit' || echo "Failed to 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
 
+# Disable Click Wallpaper to Reveal Desktop
+defaults write com.apple.WindowManager EnableStandardClickToShowDesktop -bool false
+
 # Prevent macOS from reopening windows when logging back in
 defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 
