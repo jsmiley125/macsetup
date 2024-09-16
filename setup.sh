@@ -31,19 +31,6 @@ dock_item() {
 echo "Starting Mac setup..."
 echo
 
-# Install Xcode Command Line Tools if not already installed.
-if ! xcode-select -p > /dev/null 2>&1; then
-    echo "Installing Xcode Command Line Tools..."
-    xcode-select --install
-
-    # Wait until the Command Line Tools are installed
-    echo "Waiting for Xcode Command Line Tools installation to complete..."
-    until xcode-select -p > /dev/null 2>&1; do
-        sleep 5
-    done
-    echo "Xcode Command Line Tools installed."
-fi
-
 # Request and keep the administrator password active.
 sudo -v
 while true; do
@@ -51,25 +38,6 @@ while true; do
     sleep 60
     kill -0 "$$" || exit
 done 2>/dev/null &
-
-# First, let's give this shiny new Mac (or rebuilt Mac) a name.
-# Set Computer Name
-echo "Configuring computer name..."
-
-# Prompt the user for the new computer name
-read -p "Enter the new computer name: " NEW_COMPUTER_NAME
-
-if [ -z "$NEW_COMPUTER_NAME" ]; then
-    echo "No computer name provided. Skipping computer name configuration."
-else
-    # Set the new computer name
-    sudo scutil --set ComputerName "$NEW_COMPUTER_NAME"
-    sudo scutil --set HostName "$NEW_COMPUTER_NAME"
-    sudo scutil --set LocalHostName "$NEW_COMPUTER_NAME"
-    sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$NEW_COMPUTER_NAME"
-
-    echo "Computer name set to '$NEW_COMPUTER_NAME'."
-fi
 
 # Check for and install any macOS updates
 echo "Checking for macOS updates..."
@@ -97,6 +65,37 @@ else
         brctl download "$folder" > /dev/null 2>&1 &
     done
     echo "iCloud folder downloads initiated in the background."
+fi
+
+# Install Xcode Command Line Tools if not already installed.
+if ! xcode-select -p > /dev/null 2>&1; then
+    echo "Installing Xcode Command Line Tools..."
+    xcode-select --install
+
+    # Wait until the Command Line Tools are installed
+    echo "Waiting for Xcode Command Line Tools installation to complete..."
+    until xcode-select -p > /dev/null 2>&1; do
+        sleep 5
+    done
+    echo "Xcode Command Line Tools installed."
+fi
+
+# First, let's give this shiny new Mac (or rebuilt Mac) a name.
+# Set Computer Name
+echo "Configuring computer name..."
+
+# Prompt the user for the new computer name
+read -p "Enter the new computer name: " NEW_COMPUTER_NAME
+
+if [ -z "$NEW_COMPUTER_NAME" ]; then
+    echo "No computer name provided. Skipping computer name configuration."
+else
+    # Set the new computer name
+    sudo scutil --set ComputerName "$NEW_COMPUTER_NAME"
+    sudo scutil --set HostName "$NEW_COMPUTER_NAME"
+    sudo scutil --set LocalHostName "$NEW_COMPUTER_NAME"
+    sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$NEW_COMPUTER_NAME"
+    echo "Computer name set to '$NEW_COMPUTER_NAME'."
 fi
 
 # Close any open System Preferences panes to prevent them from overriding settings we're about to change
@@ -203,22 +202,8 @@ if ! command -v brew >/dev/null 2>&1; then
 # Define the log file path
 LOGFILE="/tmp/homebrew_install.log"
 
-# Run the Homebrew installation with redirected output
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
-    1>"$LOGFILE" \
-    2> >(tee -a "$LOGFILE" >&2)
-
-# Check if Homebrew was installed successfully
-if command -v brew >/dev/null 2>&1; then
-    echo "Homebrew installed successfully."
-else
-    echo "Homebrew installation failed. Please check the log file at $LOGFILE for details."
-    exit 1
-fi
-else
-    echo
-    echo "Homebrew already installed."
-fi
+# Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Update and upgrade Homebrew
 echo "Updating and upgrading Homebrew..."
@@ -259,13 +244,10 @@ else
 fi
 
 # Install applications from Brewfile
-# While in testing phase, the path below will not work. Until testing is
-# complete, the Brewfile will be located in the same directory as this script.
-BREWFILE=./Brewfile                      # Temporary path for testing.
-# When testing is complete and this script works as expected, uncomment the
-# line below and comment out the line above.
-# BREWFILE="${HOME}/Documents/NewMacSetup/Brewfile"
+# Prompt the user for the path to the Brewfile
+read -p "Enter the path to the Brewfile: " BREWFILE
 
+# Check if the Brewfile exists and install the applications
 if [[ -f "$BREWFILE" ]]; then
     echo "Installing packages from Brewfile..."
     brew bundle --file "$BREWFILE"
