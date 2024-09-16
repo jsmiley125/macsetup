@@ -71,6 +71,12 @@ else
     echo "Computer name set to '$NEW_COMPUTER_NAME'."
 fi
 
+# Check for and install any macOS updates
+echo "Checking for macOS updates..."
+sudo softwareupdate --background
+sudo softwareupdate --install-rosetta --agree-to-license > /dev/null 2>&1 &
+sudo softwareupdate -d -a > /dev/null 2>&1 &
+
 # Initiate iCloud Folder Downloads
 echo "Initiating iCloud folder downloads..."
 
@@ -88,7 +94,7 @@ if ! command -v brctl >/dev/null 2>&1; then
 else
     for folder in "${ICLOUD_FOLDERS[@]}"; do
         echo "Starting download of $folder..."
-        brctl download "$folder" &
+        brctl download "$folder" > /dev/null 2>&1 &
     done
     echo "iCloud folder downloads initiated in the background."
 fi
@@ -96,18 +102,21 @@ fi
 # Close any open System Preferences panes to prevent them from overriding settings we're about to change
 osascript -e 'tell application "System Preferences" to quit' || echo "Failed to close System Preferences"
 
+# Disable the sound effects on boot
+sudo nvram SystemAudioVolume=" "
+
+# Prevent macOS from reopening windows when logging back in
+defaults write com.apple.loginwindow TALLogoutSavesState -bool false
+
 # Decrease key repeat time and increase key repeat rate
 defaults write -g InitialKeyRepeat -int 12 # normal minimum is 15 (225 ms)
 defaults write -g KeyRepeat -int 2 # normal minimum is 2 (30 ms)
 
-# Disable the sound effects on boot
-sudo nvram SystemAudioVolume=" "
+# Hide "Recent Tags" from Finder Sidebar.
+defaults write com.apple.Finder ShowRecentTags -bool false
 
 # Remove items from the trash after 30 days.
 defaults write com.apple.finder "FXRemoveOldTrashItems" -bool "true"
-
-# Prevent macOS from reopening windows when logging back in
-defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 
 # Reveal IP address, hostname, OS version, etc., when clicking the clock in the login window
 sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo HostName
